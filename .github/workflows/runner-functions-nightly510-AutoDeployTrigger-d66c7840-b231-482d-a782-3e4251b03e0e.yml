@@ -1,0 +1,44 @@
+name: Trigger auto deployment for runner-functions-nightly510
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/runner-functions-nightly510-AutoDeployTrigger-d66c7840-b231-482d-a782-3e4251b03e0e.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.RUNNERFUNCTIONSNIGHTLY510_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: docker.io
+          registryUsername: ${{ secrets.RUNNERFUNCTIONSNIGHTLY510_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.RUNNERFUNCTIONSNIGHTLY510_REGISTRY_PASSWORD }}
+          containerAppName: runner-functions-nightly510
+          resourceGroup: swiftfiddle
+          imageToBuild: kishikawakatsumi/runner-functions-nightly510:${{ github.sha }}
+          
+            
+
+     
+
